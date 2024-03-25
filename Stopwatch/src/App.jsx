@@ -44,9 +44,10 @@ function App() {
   };
 
   const sortTheLap = () => {
-    const newLap = lap.sort((a, b) => a.localeCompare(b));
-    console.log("newLap:", newLap);
-    setLap(newLap);
+    setLap((prev) => {
+      const newLap = [...prev].sort((a, b) => a.localeCompare(b));
+      return newLap;
+    });
   };
 
   return (
