@@ -3,25 +3,51 @@ import "./App.css";
 import { inventory } from "./constants";
 function App() {
   const [cart, setCart] = useState([]);
+  const [newItem, setNewItem] = useState();
+  const [inventoryItems, setInventoryItems] = useState(inventory);
   console.log("cart", cart);
+  console.log("inventoryItems", inventoryItems);
+
+  const addNewInventory = () => {
+    const [name, quantity, price] = newItem.split(",");
+    let obj = {
+      id: inventoryItems?.length + 1,
+      name,
+      quantity: parseInt(quantity),
+      price: parseInt(price),
+    };
+    setInventoryItems((prev) => [...prev, obj]);
+    setNewItem("");
+  };
+
   return (
     <>
+      <div>Add new Inventory eg.Name,Price,stock</div>
+      <input
+        type="text"
+        value={newItem}
+        onChange={(e) => setNewItem(e.target.value)}
+        placeholder={"Enter here!"}
+      />
+      <button onClick={() => addNewInventory()}>Add Inventory</button>
       <h2>Cart</h2>
-      {displayCartItems(cart, setCart)}
+      {displayCartItems(cart, setCart, inventoryItems)}
       <h2>Inventories</h2>
-      {displayInventoryItems(cart, setCart)}
+      {displayInventoryItems(cart, setCart, inventoryItems)}
     </>
   );
 }
 
-const displayInventoryItems = (cart, setCart) => {
+const displayInventoryItems = (cart, setCart, inventoryItems) => {
   return (
     <>
       <ul>
-        {inventory.map((item) => (
+        {inventoryItems.map((item) => (
           <li key={item.id}>
             <span>{item.name}</span>
-            <button onClick={() => addToCart(item.id - 1, setCart)}>
+            <button
+              onClick={() => addToCart(item.id - 1, setCart, inventoryItems)}
+            >
               Add to cart
             </button>
           </li>
@@ -31,7 +57,7 @@ const displayInventoryItems = (cart, setCart) => {
   );
 };
 
-const displayCartItems = (cart, setCart) => {
+const displayCartItems = (cart, setCart, inventoryItems) => {
   return (
     <div
       style={{
@@ -57,18 +83,18 @@ const displayCartItems = (cart, setCart) => {
           >
             <div>
               <span>
-                {item?.quantity} X {inventory[item.id].name}
+                {item?.quantity} X {inventoryItems[item.id].name}
               </span>
             </div>
             <div>
               <button onClick={() => removeItem(item.id, setCart)}>-</button>
               <button
-                onClick={() => addToCart(item.id, setCart)}
-                disabled={item.quantity >= inventory[item.id].quantity}
+                onClick={() => addToCart(item.id, setCart, inventoryItems)}
+                disabled={item.quantity >= inventoryItems[item.id].quantity}
               >
                 +
               </button>
-              <span>$ {inventory[item.id].price}</span>
+              <span>$ {inventoryItems[item.id].price}</span>
             </div>
           </div>
         </div>
@@ -83,7 +109,7 @@ const displayCartItems = (cart, setCart) => {
         }}
       >
         <span>Total</span>
-        <span>$ {calculateTotal(cart)}</span>
+        <span>$ {calculateTotal(cart, inventoryItems)}</span>
       </div>
     </div>
   );
@@ -102,17 +128,19 @@ const removeItem = (productId, setCart) => {
   });
 };
 
-const calculateTotal = (cart) => {
+const calculateTotal = (cart, inventoryItems) => {
   let total = 0;
   cart.forEach((element) => {
-    total += element.quantity * inventory[element.id].price;
+    total += element.quantity * inventoryItems[element.id].price;
   });
 
-  return total;
+  return Math.abs(total);
 };
 
-const addToCart = (productId, setCart) => {
-  const stock = inventory[productId]?.quantity;
+const addToCart = (productId, setCart, inventoryItems) => {
+  // console.log("stock", stock);
+  console.log("productid", productId);
+  const stock = inventoryItems[productId]?.quantity;
   setCart((prev) => {
     const isItemPresent = prev.findIndex((item) => item.id === productId);
     if (isItemPresent !== -1) {
